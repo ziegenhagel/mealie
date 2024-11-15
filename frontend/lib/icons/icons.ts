@@ -267,6 +267,7 @@ export const icons = {
   star: mdiStar,
   stop: mdiStop,
   testTube: mdiTestTube,
+  text: mdiText,
   timelineText: mdiTimelineText,
   timer: mdiTimer,
   timerPause: mdiTimerPause,

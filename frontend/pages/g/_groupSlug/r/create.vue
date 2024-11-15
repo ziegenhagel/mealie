@@ -58,6 +58,12 @@ export default defineComponent({
         value: "html",
       },
       {
+        // just textarea dump voice actived icon
+        icon: $globals.icons.text,
+        text: i18n.tc("recipe.import-from-plaintext"),
+        value: "plaintext",
+      },
+      {
         icon: $globals.icons.fileImage,
         text: i18n.tc("recipe.create-from-image"),
         value: "image",

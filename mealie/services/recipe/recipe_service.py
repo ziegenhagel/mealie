@@ -307,6 +307,16 @@ class RecipeService(RecipeServiceBase):
                 data_service.write_image(f.read(), "webp")
             return recipe
 
+    async def create_from_text(self, text: str, translate_language: str | None = None) -> Recipe:
+        openai_recipe_service = OpenAIRecipeService(self.repos, self.user, self.household, self.translator)
+
+        recipe_data = await openai_recipe_service.build_recipe_from_text(text, translate_language=translate_language)
+        recipe_data = cleaner.clean(recipe_data, self.translator)
+
+        recipe = self.create_one(recipe_data)
+
+        return recipe
+
     def duplicate_one(self, old_slug_or_id: str | UUID, dup_data: RecipeDuplicate) -> Recipe:
         """Duplicates a recipe and returns the new recipe."""
 
@@ -503,3 +513,57 @@ class OpenAIRecipeService(RecipeServiceBase):
             raise ValueError("Unable to parse recipe from image") from e
 
         return recipe
+
+    async def build_recipe_from_text(self, text: str, translate_language: str | None) -> Recipe:
+        settings = get_app_settings()
+        if not settings.OPENAI_ENABLED:
+            raise ValueError("OpenAI services are not available")
+
+        openai_service = OpenAIService()
+        prompt = openai_service.get_prompt(
+            "recipes.parse-recipe-text",
+            data_injections=[
+                OpenAIDataInjection(
+                    description=(
+                        "This is the JSON response schema. You must respond in valid JSON that follows this schema. "
+                        "Your payload should be as compact as possible, eliminating unncessesary whitespace. "
+                        "Any fields with default values which you do not populate should not be in the payload."
+                    ),
+                    value=OpenAIRecipe,
+                )
+            ],
+        )
+
+        # Clean the input text
+        lines = text.split("\n")
+        cleaned_lines = [
+            line.strip()
+            for line in lines
+            if line.strip() and not line.startswith("---") and "Content-Disposition" not in line
+        ]
+        cleaned_text = "\n".join(cleaned_lines)
+
+        message = "Please extract the recipe from the text provided and format it as a recipe."
+        message += "Create a meaningful name based on the ingredients."
+        message += " There should be exactly one recipe."
+        message += f" The text provided is: {cleaned_text}"
+
+        if translate_language:
+            message += f" Please translate the recipe to {translate_language}."
+
+        try:
+            # Explizit das model und response_format setzen
+            response = await openai_service.get_response(prompt, message, force_json_response=True)
+
+            if not response or response == "{}":
+                raise ValueError("Empty response from OpenAI")
+
+        except Exception as e:
+            raise Exception("Failed to call OpenAI services") from e
+
+        try:
+            openai_recipe = OpenAIRecipe.parse_openai_response(response)
+            recipe = self._convert_recipe(openai_recipe)
+            return recipe
+        except Exception as e:
+            raise ValueError("Unable to parse recipe from text") from e

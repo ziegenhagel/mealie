@@ -36,6 +36,7 @@ const routes = {
   recipesCreateUrlBulk: `${prefix}/recipes/create/url/bulk`,
   recipesCreateFromZip: `${prefix}/recipes/create/zip`,
   recipesCreateFromImage: `${prefix}/recipes/create/image`,
+  recipesCreateFromText: `${prefix}/recipes/create/text`,
   recipesCreateFromHtmlOrJson: `${prefix}/recipes/create/html-or-json`,
   recipesCategory: `${prefix}/recipes/category`,
   recipesParseIngredient: `${prefix}/parser/ingredient`,
@@ -155,6 +156,18 @@ export class RecipeAPI extends BaseCRUDAPI<CreateRecipe, Recipe, Recipe> {
     let apiRoute = routes.recipesCreateFromImage
     if (translateLanguage) {
       apiRoute = `${apiRoute}?translateLanguage=${translateLanguage}`
+    }
+
+    return await this.requests.post<string>(apiRoute, formData);
+  }
+
+  async createOneFromText(text: string, translateLanguage: string | null = null) {
+    const formData = new FormData();
+    formData.append("text", text);
+
+    let apiRoute = routes.recipesCreateFromText;
+    if (translateLanguage) {
+      apiRoute = `${apiRoute}?translateLanguage=${translateLanguage}`;
     }
 
     return await this.requests.post<string>(apiRoute, formData);

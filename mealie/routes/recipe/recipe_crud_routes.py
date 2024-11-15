@@ -8,6 +8,7 @@ import orjson
 import sqlalchemy
 from fastapi import (
     BackgroundTasks,
+    Body,
     Depends,
     File,
     Form,
@@ -320,6 +321,34 @@ class RecipeController(BaseRecipeController):
             )
 
         recipe = await self.service.create_from_images(images, translate_language)
+        self.publish_event(
+            event_type=EventTypes.recipe_created,
+            document_data=EventRecipeData(operation=EventOperation.create, recipe_slug=recipe.slug),
+            group_id=recipe.group_id,
+            household_id=recipe.household_id,
+        )
+
+        return recipe.slug
+
+    @router.post("/create/text", status_code=201)
+    async def create_recipe_from_text(
+        self,
+        text: str = Body(..., description="The recipe text to process"),
+        translate_language: str | None = Query(None, alias="translateLanguage"),
+    ):
+        """
+        Create a recipe from text using OpenAI.
+        Optionally specify a language for it to translate the recipe to.
+        """
+
+        if not self.settings.OPENAI_ENABLED:
+            raise HTTPException(
+                status_code=400,
+                detail=ErrorResponse.respond("OpenAI services are not enabled"),
+            )
+
+        recipe = await self.service.create_from_text(text, translate_language)
+
         self.publish_event(
             event_type=EventTypes.recipe_created,
             document_data=EventRecipeData(operation=EventOperation.create, recipe_slug=recipe.slug),
