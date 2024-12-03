@@ -604,7 +604,7 @@
     "create-recipe-from-an-image-description": "Create a recipe by uploading an image of it. Mealie will attempt to extract the text from the image using AI and create a recipe from it.",
     "import-from-plaintext": "Import Recipe from Plain Text",
     "create-recipe-from-text": "Create Recipe from Text",
-    "create-recipe-from-text-description": "Enter your recipe text below and we'll help you format it",
+    "create-recipe-from-text-description": "Type out your recipe in plain text from any source, and we'll send it to your OpenAI service to create a recipe from it. Be sure to include everything needed to create the recipe (the recipe name, description, all of the steps and ingredients, etc.). If your device supports it, you can even use text-to-speech and speak your recipe out loud.",
     "enter-recipe-text": "Enter Recipe Text",
     "recipe-text-placeholder": "Paste or type your recipe here...",
     "please-wait-processing": "Please wait while we process your recipe...",
