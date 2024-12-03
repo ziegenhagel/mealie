@@ -14,6 +14,7 @@ from tests.utils import api_routes
 from tests.utils.factories import random_int, random_string
 from tests.utils.fixture_schemas import TestUser
 
+
 def test_openai_create_recipe_from_text(
     api_client: TestClient,
     monkeypatch: pytest.MonkeyPatch,
@@ -49,6 +50,7 @@ def test_openai_create_recipe_from_text(
     slug: str = json.loads(r.text)
     r = api_client.get(api_routes.recipes_slug(slug), headers=unique_user.token)
     assert r.status_code == 200
+
 
 def test_openai_create_recipe_from_text_with_translation(
     api_client: TestClient,

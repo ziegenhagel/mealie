@@ -39,6 +39,7 @@ export default defineComponent({
     const { $auth, $globals, i18n } = useContext();
 
     const appInfo = useAppInfo();
+    const enableOpenAI = computed(() => appInfo.value?.enableOpenai);
     const enableOpenAIImages = computed(() => appInfo.value?.enableOpenaiImageServices);
 
     const subpages = computed<MenuItem[]>(() => [
@@ -62,6 +63,7 @@ export default defineComponent({
         icon: $globals.icons.text,
         text: i18n.tc("recipe.import-from-plaintext"),
         value: "plaintext",
+        hide: !enableOpenAI.value,
       },
       {
         icon: $globals.icons.fileImage,
